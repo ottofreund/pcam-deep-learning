@@ -2,7 +2,8 @@ import os
 
 from datasets import load_dataset
 import tensorflow as tf
-import keras
+
+from pcam_model import build_pcam_model
 
 BATCH_SIZE = 64
 
@@ -15,23 +16,9 @@ ds_dict = load_dataset(DATASET)
 
 train_set = ds_dict["train"].to_tf_dataset(columns="image", label_cols="label", batch_size=BATCH_SIZE, shuffle=True, drop_remainder=True)
 val_set = ds_dict["valid"].to_tf_dataset(columns="image", label_cols="label", batch_size=BATCH_SIZE, shuffle=False, drop_remainder=True)
-test_set = ds_dict["test"].to_tf_dataset(columns="image", label_cols="label", batch_size=BATCH_SIZE, shuffle=False, drop_remainder=True)
 
-#Create model
-model = keras.Sequential([
-    keras.Input(shape=(96, 96, 3)),
-    keras.layers.Rescaling(1.0 / 255), #pixels values to [0, 1]
-    keras.layers.Conv2D(filters=32, kernel_size=(3, 3), activation='relu', data_format='channels_last'), #takes in a 96x96x3 image
-    keras.layers.MaxPool2D(pool_size=(2, 2), strides=(2, 2)),
-    keras.layers.Conv2D(filters=64, kernel_size=(3, 3), activation='relu'),
-    keras.layers.MaxPool2D(pool_size=(2, 2), strides=(2, 2)),
-    keras.layers.Conv2D(filters=128, kernel_size=(3, 3), activation='relu'),
-    keras.layers.MaxPool2D(pool_size=(2, 2), strides=(2, 2)),
-    keras.layers.GlobalAveragePooling2D(),
-    keras.layers.Dense(64, activation='relu'),
-    keras.layers.Dropout(0.35),
-    keras.layers.Dense(1, activation='sigmoid')
-])
+# Create model.
+model = build_pcam_model()
 
 # Callback that saves the model's weights
 cp_callback = tf.keras.callbacks.ModelCheckpoint(
@@ -48,7 +35,5 @@ model.compile(
 
 #train the model
 history = model.fit(train_set, validation_data=val_set, epochs=10, callbacks=[cp_callback])
-
-#model.evaluate(test_set)
 
 

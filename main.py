@@ -29,7 +29,7 @@ model = keras.Sequential([
     keras.layers.MaxPool2D(pool_size=(2, 2), strides=(2, 2)),
     keras.layers.GlobalAveragePooling2D(),
     keras.layers.Dense(64, activation='relu'),
-    keras.layers.Dropout(0.5),
+    keras.layers.Dropout(0.35),
     keras.layers.Dense(1, activation='sigmoid')
 ])
 

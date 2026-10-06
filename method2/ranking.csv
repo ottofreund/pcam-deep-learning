@@ -1,0 +1,9 @@
+rank,epoch,checkpoint,accuracy,loss,precision,recall,val_accuracy,val_loss,val_precision,val_recall
+8,10,training_1/cp-epoch-10.weights.h5,0.8671,0.3115,0.8717,0.8609,0.8313,0.3768,0.8719,0.7764
+7,9,training_1/cp-epoch-09.weights.h5,0.8665,0.3127,0.8705,0.8611,0.8297,0.3865,0.8747,0.7693
+5,7,training_1/cp-epoch-07.weights.h5,0.8659,0.3143,0.8698,0.8607,0.8294,0.3830,0.8726,0.7711
+4,6,training_1/cp-epoch-06.weights.h5,0.8657,0.3153,0.8698,0.8603,0.8292,0.3797,0.8456,0.8051
+6,8,training_1/cp-epoch-08.weights.h5,0.8667,0.3129,0.8708,0.8612,0.8289,0.3842,0.8491,0.7994
+2,4,training_1/cp-epoch-04.weights.h5,0.8641,0.3180,0.8681,0.8587,0.8283,0.3867,0.8749,0.7658
+3,5,training_1/cp-epoch-05.weights.h5,0.8646,0.3164,0.8684,0.8596,0.8277,0.3863,0.8634,0.7782
+1,3,training_1/cp-epoch-03.weights.h5,0.8626,0.3208,0.8666,0.8571,0.8150,0.4115,0.9058,0.7028

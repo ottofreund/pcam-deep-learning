@@ -40,7 +40,7 @@ The model is highly precise when predicting tumour tissue (90.23%) and rejects n
 Run from the repository root using the project's TensorFlow environment:
 
 ```bash
-python model1_eval.py \
+python eval.py --method method1 \
   --checkpoint method1/epoch-07.weights.h5 \
   --batch-size 128 \
   --threshold 0.5

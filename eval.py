@@ -1,4 +1,4 @@
-"""Evaluate the selected Model 1 checkpoint on the official PCam test set."""
+"""Evaluate either PCam model on the official test split."""
 
 from __future__ import annotations
 
@@ -8,21 +8,29 @@ from typing import Any, Iterable
 
 import numpy as np
 
+from train import DATASET, METHODS, build_model
+
 
 REPOSITORY_ROOT = Path(__file__).resolve().parent
-DATASET = "1aurent/PatchCamelyon"
-DEFAULT_CHECKPOINT = REPOSITORY_ROOT / "training_1" / "cp.weights.h5"
+DEFAULT_CHECKPOINTS = {
+    "method1": REPOSITORY_ROOT / "method1" / "epoch-07.weights.h5",
+    "method2": REPOSITORY_ROOT / "method2" / "cp-epoch-10.weights.h5",
+}
+DEFAULT_BATCH_SIZE = 128
+DEFAULT_THRESHOLD = 0.5
 
 
-def load_model(checkpoint_path: Path = DEFAULT_CHECKPOINT):
-    """Rebuild Model 1 and load the selected epoch's weights."""
-    checkpoint_path = Path(checkpoint_path)
+def load_model(method: str = "method1", checkpoint_path: Path | None = None):
+    """Rebuild the selected architecture and restore its checkpoint weights."""
+    if method not in METHODS:
+        raise ValueError(f"Unknown method: {method}")
+    checkpoint_path = Path(
+        checkpoint_path if checkpoint_path is not None else DEFAULT_CHECKPOINTS[method]
+    )
     if not checkpoint_path.is_file():
         raise FileNotFoundError(f"Checkpoint not found: {checkpoint_path}")
 
-    from simple_model import build_pcam_model
-
-    model = build_pcam_model()
+    model = build_model(method, pretrained=False)
     model.load_weights(checkpoint_path)
     return model
 
@@ -64,7 +72,7 @@ def evaluate_batches(
 
     for images, labels in batches:
         probabilities = np.asarray(model.predict_on_batch(images)).reshape(-1)
-        labels = np.asarray(labels).astype(np.int8, copy=False).reshape(-1)
+        labels = np.asarray(labels).reshape(-1)
 
         if probabilities.size != labels.size:
             raise ValueError("The number of predictions does not match the labels")
@@ -105,37 +113,49 @@ def evaluate_batches(
     }
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Evaluate Model 1 weights on the official PCam test split."
+        description="Evaluate a PCam model's weights on the official test split."
     )
+    parser.add_argument("--method", choices=METHODS, default="method1")
     parser.add_argument(
         "--checkpoint",
         type=Path,
-        default=DEFAULT_CHECKPOINT,
-        help=f"Model 1 weights (default: {DEFAULT_CHECKPOINT})",
+        default=None,
+        help=(
+            "Weights to evaluate (default: method1/epoch-07.weights.h5 or "
+            "method2/cp-epoch-10.weights.h5, according to --method)."
+        ),
     )
     parser.add_argument(
         "--batch-size",
         type=int,
-        default=128,
+        default=DEFAULT_BATCH_SIZE,
         help="Inference batch size (default: 128)",
     )
     parser.add_argument(
         "--threshold",
         type=float,
-        default=0.5,
+        default=DEFAULT_THRESHOLD,
         help="Positive-class probability threshold (default: 0.5)",
     )
-    return parser.parse_args()
+    args = parser.parse_args(argv)
+    if args.batch_size < 1:
+        parser.error("--batch-size must be at least 1")
+    if not 0.0 <= args.threshold <= 1.0:
+        parser.error("--threshold must be between 0 and 1")
+    if args.checkpoint is None:
+        args.checkpoint = DEFAULT_CHECKPOINTS[args.method]
+    return args
 
 
 def main() -> None:
     args = parse_args()
+    model = load_model(args.method, args.checkpoint)
     batches = load_test_batches(args.batch_size)
-    model = load_model(args.checkpoint)
     results = evaluate_batches(model, batches, args.threshold)
 
+    print(f"Method: {args.method}")
     print(f"Checkpoint: {args.checkpoint.resolve()}")
     print(f"Dataset: {DATASET} (test split)")
     print(f"Examples: {results['examples']}")

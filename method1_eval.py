@@ -20,7 +20,7 @@ def load_model(checkpoint_path: Path = DEFAULT_CHECKPOINT):
     if not checkpoint_path.is_file():
         raise FileNotFoundError(f"Checkpoint not found: {checkpoint_path}")
 
-    from pcam_model import build_pcam_model
+    from simple_model import build_pcam_model
 
     model = build_pcam_model()
     model.load_weights(checkpoint_path)

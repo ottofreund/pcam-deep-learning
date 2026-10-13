@@ -1,4 +1,4 @@
-"""Utilities for producing reproducible, inspectable Method 1 training runs."""
+"""Utilities for producing reproducible, inspectable PCam training runs."""
 
 from __future__ import annotations
 

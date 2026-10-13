@@ -1,28 +1,10 @@
 from datasets import load_dataset
 import tensorflow as tf
-import keras
+from densenet_model import build_densenet_model
 
 BATCH_SIZE = 64
 DATASET = "1aurent/PatchCamelyon"
 WEIGHTS_PATH = "method2/cp-epoch-10.weights.h5"
-
-
-def create_model():
-    # The saved checkpoint restores the ImageNet-pretrained backbone weights.
-    backbone = keras.applications.DenseNet121(
-        include_top=False,
-        weights=None,
-        input_shape=(96, 96, 3),
-    )
-    backbone.trainable = False
-
-    inputs = keras.Input(shape=(96, 96, 3))
-    x = keras.applications.densenet.preprocess_input(inputs)
-    x = backbone(x, training=False)
-    x = keras.layers.GlobalAveragePooling2D()(x)
-    outputs = keras.layers.Dense(1, activation="sigmoid")(x)
-
-    return keras.Model(inputs, outputs)
 
 
 ds_dict = load_dataset(DATASET)
@@ -35,7 +17,7 @@ test_set = ds_dict["test"].to_tf_dataset(
     drop_remainder=False,
 )
 
-model = create_model()
+model = build_densenet_model(weights=None)
 model.load_weights(WEIGHTS_PATH)
 
 all_labels = []
